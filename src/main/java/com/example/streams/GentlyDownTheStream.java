@@ -49,8 +49,7 @@ public class GentlyDownTheStream {
         return sortedFruitsWithFilter(fruit -> !fruit.startsWith("A"));
     }
 
-    // TODO - return a list with the first 2 elements of a sorted list of fruits
-    // Add proper validation and exception handling
+    // Return the first two elements from the sorted fruits list.
     public List<String> sortedFruitsFirstTwo() throws InvalidDataException {
         validateCollection(fruits, "Fruits collection");
 
@@ -67,8 +66,7 @@ public class GentlyDownTheStream {
         }
     }
 
-    // TODO - return a comma separated String of sorted fruits
-    // Handle null values and empty results gracefully
+    // Return a comma-separated string of sorted fruits.
     public String commaSeparatedListOfFruits() throws InvalidDataException {
         validateCollection(fruits, "Fruits collection");
 
@@ -84,8 +82,7 @@ public class GentlyDownTheStream {
         }
     }
 
-    // TODO - return a list of veggies sorted in reverse (descending) order
-    // Use Comparator.reverseOrder() and handle edge cases
+    // Return veggies sorted in reverse (descending) order.
     public List<String> reverseSortedVeggies() throws InvalidDataException {
         validateCollection(veggies, "Veggies collection");
 
@@ -101,8 +98,7 @@ public class GentlyDownTheStream {
         }
     }
 
-    // TODO - return a list of veggies sorted in reverse order, all in upper case
-    // Chain multiple stream operations with proper exception handling
+    // Return reverse-sorted veggies converted to uppercase.
     public List<String> reverseSortedVeggiesInUpperCase() throws InvalidDataException {
         validateCollection(veggies, "Veggies collection");
 
@@ -119,28 +115,74 @@ public class GentlyDownTheStream {
         }
     }
 
-    // TODO - return a list of the top 10 values in the list of random integers
-    // Handle cases where list has fewer than 10 elements
+    // Return the top 10 values from integerValues.
     public List<Integer> topTen() throws InvalidDataException {
-        return null;
+        validateCollection(integerValues, "Integer values collection");
+
+        try {
+            return integerValues.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.reverseOrder())
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to get top ten values", e);
+        }
     }
 
-    // TODO - return a list of the top 10 unique values in the list of random integers
-    // Use distinct() operation and handle empty results
+    // Return the top 10 unique values from integerValues.
     public List<Integer> topTenUnique() throws InvalidDataException {
-        return null;
+        validateCollection(integerValues, "Integer values collection");
+
+        try {
+            return integerValues.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.reverseOrder())
+                    .distinct()
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to get top ten unique values", e);
+        }
     }
 
-    // TODO - return a list of the top 10 unique values that are odd
-    // Combine filtering, distinct, and limiting operations
+    // Return the top 10 unique odd values from integerValues.
     public List<Integer> topTenUniqueOdd() throws InvalidDataException {
-        return null;
+        validateCollection(integerValues, "Integer values collection");
+
+        try {
+            return integerValues.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.reverseOrder())
+                    .distinct()
+                    .filter(x -> x % 2 != 0)
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to get top ten unique odd values", e);
+        }
     }
 
-    // TODO - return the average of all random numbers
-    // Handle potential OptionalDouble and division by zero scenarios
+    // Return the average of all valid integer values.
     public Double average() throws InvalidDataException {
-        return null;
+        if (integerValues == null) {
+            throw new IllegalArgumentException("Integer values collection cannot be null");
+        }
+
+        try {
+            return safeAverage(integerValues)
+                    .orElseThrow(() -> new InvalidDataException("Cannot calculate average: no valid integer values"));
+        } catch (IllegalArgumentException | InvalidDataException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to calculate average", e);
+        }
     }
 
     // Generic method for safe collection operations
