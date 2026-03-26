@@ -87,13 +87,36 @@ public class GentlyDownTheStream {
     // TODO - return a list of veggies sorted in reverse (descending) order
     // Use Comparator.reverseOrder() and handle edge cases
     public List<String> reverseSortedVeggies() throws InvalidDataException {
-        return null;
+        validateCollection(veggies, "Veggies collection");
+
+        try {
+            return veggies.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.reverseOrder())
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to reverse sort veggies", e);
+        }
     }
 
     // TODO - return a list of veggies sorted in reverse order, all in upper case
     // Chain multiple stream operations with proper exception handling
     public List<String> reverseSortedVeggiesInUpperCase() throws InvalidDataException {
-        return null;
+        validateCollection(veggies, "Veggies collection");
+
+        try {
+            return veggies.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.reverseOrder())
+                    .map(v -> v.toUpperCase(Locale.ROOT))
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to reverse sort and uppercase veggies", e);
+        }
     }
 
     // TODO - return a list of the top 10 values in the list of random integers
