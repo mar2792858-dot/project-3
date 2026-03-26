@@ -28,15 +28,17 @@ public class GentlyDownTheStream {
      * Returns a sorted list of fruits with comprehensive error checking
      */
     public List<String> sortedFruits() throws InvalidDataException {
-        try {
-            validateCollection(fruits, "Fruits collection");
+        validateCollection(fruits, "Fruits collection");
 
+        try {
             return fruits.stream()
-                    .filter(Objects::nonNull) // Handle potential null elements
+                    .filter(Objects::nonNull)
                     .sorted()
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new InvalidDataException("Failed to sort fruits: " + e.getMessage());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e; // preserve expected test contract
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to sort fruits", e);
         }
     }
 
@@ -50,15 +52,36 @@ public class GentlyDownTheStream {
     // TODO - return a list with the first 2 elements of a sorted list of fruits
     // Add proper validation and exception handling
     public List<String> sortedFruitsFirstTwo() throws InvalidDataException {
-        // Implement with validation, null checks, and exception handling
-        return null;
+        validateCollection(fruits, "Fruits collection");
+
+        try {
+            return fruits.stream()
+                    .filter(Objects::nonNull)
+                    .sorted()
+                    .limit(2)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to get first two sorted fruits", e);
+        }
     }
 
     // TODO - return a comma separated String of sorted fruits
     // Handle null values and empty results gracefully
     public String commaSeparatedListOfFruits() throws InvalidDataException {
-        // Implement with proper string joining and validation
-        return null;
+        validateCollection(fruits, "Fruits collection");
+
+        try {
+            return fruits.stream()
+                    .filter(Objects::nonNull)
+                    .sorted()
+                    .collect(Collectors.joining(", "));
+        } catch (IllegalArgumentException | EmptyCollectionException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidDataException("Failed to create comma-separated fruit list", e);
+        }
     }
 
     // TODO - return a list of veggies sorted in reverse (descending) order
