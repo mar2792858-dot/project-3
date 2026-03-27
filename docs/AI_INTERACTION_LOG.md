@@ -20,6 +20,18 @@ would highly consider an approach that did not sort the entire collection
 and/or reduced the data first and take into consideration other constraints
 in the project.
 
+In a review of the methods, it suggested creating a custom
+exception and utilizing that in an attempt to be more
+detailed about the root cause. It looked similar to
+the original exception handling I had, but I accepted it to
+see the difference and it errored all of my tests.
+Because the messaging seemed similar, previous code
+passed tests I rolled the changes back. 
+
+For the missing test cases and edge cases, the recommendation
+is heavily focused on filling in the placeholder tests. 
+When I accepted placeholder changes, and it looks like
+the tests still pass.
 
 
 

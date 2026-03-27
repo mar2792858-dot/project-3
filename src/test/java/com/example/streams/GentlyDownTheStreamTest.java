@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
+import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -201,8 +203,23 @@ class GentlyDownTheStreamTest {
         @Test
         @DisplayName("Should throw InvalidDataException on processing failure")
         void shouldThrowInvalidDataExceptionOnFailure() {
-            // This test demonstrates exception propagation
-            // Actual implementation would depend on specific failure scenarios
+            GentlyDownTheStream brokenStream = new GentlyDownTheStream();
+            brokenStream.fruits = new AbstractList<>() {
+                @Override
+                public String get(int index) {
+                    throw new RuntimeException("boom");
+                }
+
+                @Override
+                public int size() {
+                    return 1;
+                }
+            };
+
+            assertThatThrownBy(brokenStream::sortedFruits)
+                    .isInstanceOf(InvalidDataException.class)
+                    .hasMessageContaining("Failed to sort fruits")
+                    .hasCauseInstanceOf(RuntimeException.class);
         }
 
         @Test
@@ -214,6 +231,17 @@ class GentlyDownTheStreamTest {
                 emptyIntStream.average();
             }).isInstanceOf(InvalidDataException.class);
         }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException for null integer collection")
+        void shouldHandleNullIntegerCollectionInAverage() {
+            assertThatThrownBy(() -> {
+                GentlyDownTheStream nullIntStream = new GentlyDownTheStream();
+                nullIntStream.integerValues = null;
+                nullIntStream.average();
+            }).isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("cannot be null");
+        }
     }
 
     @Nested
@@ -223,22 +251,55 @@ class GentlyDownTheStreamTest {
         @Test
         @DisplayName("Should handle collections with fewer than requested elements")
         void shouldHandleFewerElementsThanRequested() {
-            // Test behavior when requesting top 10 from a list with < 10 elements
-            // Implementation should handle this gracefully
+            stream.integerValues = List.of(3, 1, 2);
+
+            assertDoesNotThrow(() -> {
+                List<Integer> actual = stream.topTen();
+                assertThat(actual).isEqualTo(List.of(3, 2, 1));
+            });
         }
 
         @Test
         @DisplayName("Should handle collections with null elements")
         void shouldHandleNullElements() {
-            // Test filtering out null elements in streams
-            // Demonstrates robust null handling
+            stream.integerValues = Arrays.asList(9, null, 9, 8, 7, null, 7);
+
+            assertDoesNotThrow(() -> {
+                List<Integer> actual = stream.topTenUniqueOdd();
+                assertThat(actual).isEqualTo(List.of(9, 7));
+            });
         }
 
         @Test
         @DisplayName("Should handle all even numbers in odd filter")
         void shouldHandleAllEvenNumbers() {
-            // Test case where no odd numbers exist
-            // Should return empty list, not throw exception
+            stream.integerValues = List.of(10, 8, 6, 4, 2);
+
+            assertDoesNotThrow(() -> {
+                List<Integer> actual = stream.topTenUniqueOdd();
+                assertThat(actual).isEmpty();
+            });
+        }
+
+        @Test
+        @DisplayName("Should filter null fruits instead of failing")
+        void shouldFilterOutNullFruits() {
+            stream.fruits = Arrays.asList("Banana", null, "Apple");
+
+            assertDoesNotThrow(() -> {
+                List<String> actual = stream.sortedFruits();
+                assertThat(actual).isEqualTo(List.of("Apple", "Banana"));
+            });
+        }
+
+        @Test
+        @DisplayName("Should return InvalidDataException when average has no valid values")
+        void shouldHandleAllNullIntegerValuesInAverage() {
+            stream.integerValues = Arrays.asList(null, null);
+
+            assertThatThrownBy(stream::average)
+                    .isInstanceOf(InvalidDataException.class)
+                    .hasMessageContaining("no valid integer values");
         }
     }
 
@@ -249,15 +310,24 @@ class GentlyDownTheStreamTest {
         @Test
         @DisplayName("Should maintain type safety with generics")
         void shouldMaintainTypeSafety() {
-            // Demonstrates proper generic usage
-            // Type safety should be maintained throughout operations
+            assertDoesNotThrow(() -> {
+                List<Integer> actual = stream.topTenUnique();
+                assertThat(actual).allSatisfy(v -> assertThat(v).isInstanceOf(Integer.class));
+            });
         }
 
         @Test
         @DisplayName("Should use proper functional interfaces")
         void shouldUseProperFunctionalInterfaces() {
-            // Test demonstrates proper lambda and method reference usage
-            // Validates functional programming concepts
+            List<String> expected = stream.fruits.stream()
+                    .filter(x -> !x.startsWith("A"))
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            assertDoesNotThrow(() -> {
+                List<String> actual = stream.sortedFruitsException();
+                assertThat(actual).isEqualTo(expected);
+            });
         }
     }
 }
